@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0f0f1a">
+<title>復習管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+/* ===== VARIABLES ===== */
+:root {
+  --bg:       #0f0f1a;
+  --bg2:      #16162a;
+  --surface:  #1e1e35;
+  --surface2: #262645;
+  --border:   #2e2e52;
+  --text:     #e8e6f4;
+  --muted:    #7878a0;
+  --dim:      #3a3a60;
+
+  /* レベル色 lv0=未着手 lv1〜lv10 */
+  --lv0:  #3a3a60;
+  --lv1:  #e53935;
+  --lv2:  #f4511e;
+  --lv3:  #fb8c00;
+  --lv4:  #fdd835;
+  --lv5:  #c0ca33;
+  --lv6:  #43a047;
+  --lv7:  #00acc1;
+  --lv8:  #1e88e5;
+  --lv9:  #8e24aa;
+  --lv10: #f9a825;
+
+  --accent:  #7c6cf0;
+  --accent2: #a78bfa;
+  --radius:  14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 90px;
+}
+
+/* ===== HEADER ===== */
+.header {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  padding: 13px 16px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.header-title {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 18px;
+  color: var(--accent2);
+}
+.btn-link {
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 50px;
+  transition: all .2s;
+  background: none;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  cursor: pointer;
+}
+.btn-link:hover { border-color: var(--accent); color: var(--accent2); }
+
+/* ===== STATS BAR ===== */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.stat-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 7px 4px;
+  text-align: center;
+}
+.stat-val {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 17px;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-label {
+  font-size: 9px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-top: 2px;
+  letter-spacing: 0.2px;
+}
+
+/* ===== FILTER ===== */
+.filter-scroll {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex: 0 0 auto;
+  padding: 5px 13px;
+  border-radius: 50px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.filter-btn.active { border-color: var(--accent); color: var(--accent2); background: rgba(124,108,240,.14); }
+
+/* ===== SEARCH ===== */
+.search-wrap {
+  padding: 8px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+.search-input {
+  width: 100%;
+  padding: 8px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  color: var(--text);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border .2s;
+}
+.search-input::placeholder { color: var(--dim); }
+.search-input:focus { border-color: var(--accent); }
+
+/* ===== SECTION ===== */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 14px 8px;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.section-header::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  padding: 1px 8px;
+  border-radius: 50px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.badge-warn {
+  background: #e53935;
+}
+
+/* ===== CHAPTER LIST ===== */
+.chapter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0 12px;
+  margin-bottom: 6px;
+}
+
+/* ===== CHAPTER CARD ===== */
+.ch-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 11px 13px 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+  position: relative;
+  overflow: hidden;
+}
+.ch-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 5px;
+  border-radius: 14px 0 0 14px;
+}
+.ch-card:active { transform: scale(.984); }
+.ch-card.locked { opacity: .35; cursor: default; }
+.ch-card.locked:active { transform: none; }
+
+/* left bar color by level */
+.ch-card.lv0::before  { background: var(--lv0); }
+.ch-card.lv1::before  { background: var(--lv1); }
+.ch-card.lv2::before  { background: var(--lv2); }
+.ch-card.lv3::before  { background: var(--lv3); }
+.ch-card.lv4::before  { background: var(--lv4); }
+.ch-card.lv5::before  { background: var(--lv5); }
+.ch-card.lv6::before  { background: var(--lv6); }
+.ch-card.lv7::before  { background: var(--lv7); }
+.ch-card.lv8::before  { background: var(--lv8); }
+.ch-card.lv9::before  { background: var(--lv9); }
+.ch-card.lv10::before { background: var(--lv10); }
+
+/* overdue highlight */
+.ch-card.overdue { border-color: rgba(229,57,53,.5); }
+
+.ch-num {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 18px;
+  color: var(--muted);
+  width: 32px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.ch-body { flex: 1; min-width: 0; }
+
+.ch-row1 {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+}
+
+.lv-badge {
+  padding: 2px 8px;
+  border-radius: 50px;
+  font-size: 10px;
+  font-weight: 900;
+  flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+/* dynamic color applied via JS */
+
+.ch-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.ch-row2 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* mini progress dots */
+.progress-dots {
+  display: flex;
+  gap: 3px;
+}
+.progress-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dim);
+  transition: background .2s;
+}
+.progress-dot.filled { background: var(--accent2); }
+
+.review-date {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin-left: auto;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.review-date.overdue-text { color: #e53935; font-weight: 700; }
+.review-date.today-text   { color: #fb8c00; font-weight: 700; }
+
+.lock-icon { font-size: 15px; flex-shrink: 0; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  padding: 11px 22px;
+  border: none;
+  border-radius: 50px;
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+}
+.btn:active { transform: scale(.96); }
+.btn-accent  { background: var(--accent); color: #fff; }
+.btn-accent:hover { background: #6a5be0; }
+.btn-surface { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
+.btn-danger  { background: rgba(229,57,53,.15); color: #e53935; border: 1.5px solid rgba(229,57,53,.3); }
+.btn-sm      { padding: 7px 16px; font-size: 12px; }
+.btn-xs      { padding: 5px 12px; font-size: 11px; }
+.btn-block   { width: 100%; border-radius: var(--radius-sm); }
+
+/* ===== MODAL ===== */
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 300;
+  align-items: flex-end;
+  justify-content: center;
+}
+.overlay.show { display: flex; }
+
+.modal {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 22px 22px 0 0;
+  padding: 20px 18px 36px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 88vh;
+  overflow-y: auto;
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.modal-title {
+  font-family: 'Kaisei Decol', serif;
+  font-size: 20px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.modal-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 18px;
+}
+
+/* Level Selector */
+.level-selector {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  margin-bottom: 18px;
+}
+.level-option {
+  padding: 10px 4px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: 'Kaisei Decol', serif;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+  transition: all .15s;
+}
+.level-option.selected {
+  border-color: transparent;
+  color: #fff;
+}
+
+/* Info rows */
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.info-row:last-of-type { border-bottom: none; }
+.info-label { color: var(--muted); font-weight: 500; }
+.info-val { font-weight: 700; color: var(--text); }
+
+/* Note input */
+.note-input {
+  width: 100%;
+  padding: 10px 13px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border .2s;
+  resize: none;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+.note-input:focus { border-color: var(--accent); }
+.note-input::placeholder { color: var(--dim); }
+
+/* Input row */
+.input-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.input-label { font-size: 12px; color: var(--muted); font-weight: 700; width: 80px; flex-shrink: 0; }
+.input-field {
+  flex: 1;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Zen Kaku Gothic New', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border .2s;
+}
+.input-field:focus { border-color: var(--accent); }
+.input-field::placeholder { color: var(--dim); }
+
+.modal-actions { display: flex; gap: 8px; margin-top: 20px; }
+.modal-actions .btn { flex: 1; }
+
+/* ===== SETTINGS MODAL ===== */
+.settings-section-title {
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 16px 0 8px;
+}
+.interval-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.interval-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+}
+.interval-item-label { font-size: 11px; color: var(--muted); font-weight: 700; width: 60px; }
+.interval-item input {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text);
+  font-family: 'Kaisei Decol', serif;
+  font-size: 16px;
+  outline: none;
+  text-align: right;
+  width: 40px;
+}
+.interval-item-unit { font-size: 11px; color: var(--muted); }
+
+/* ===== LEGEND ===== */
+.legend {
+  padding: 10px 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+/* ===== FAB ===== */
+.fab-area {
+  position: fixed;
+  bottom: 20px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-end;
+  z-index: 200;
+}
+.fab {
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,.5);
+  transition: all .2s;
+}
+.fab:active { transform: scale(.92); }
+.fab-main { background: var(--accent); color: #fff; width: 54px; height: 54px; font-size: 22px; }
+.fab-sub  { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+/* ===== EMPTY ===== */
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+.empty .emoji { font-size: 36px; display: block; margin-bottom: 10px; }
+
+/* ===== SCROLL HELPER ===== */
+html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="header">
+  <div class="header-row1">
+    <div class="header-title">📖 復習管理</div>
+    <div style="display:flex;gap:6px">
+      <button class="btn-link" onclick="openSettings()">⚙ 設定</button>
+      <a href="index.html" class="btn-link">← メイン</a>
+    </div>
+  </div>
+  <div class="stats-bar" id="stats-bar"></div>
+</header>
+
+<!-- ===== LEGEND ===== -->
+<div class="legend" id="legend"></div>
+
+<!-- ===== FILTER ===== -->
+<div class="filter-scroll" id="filter-bar">
+  <button class="filter-btn active" data-filter="all" onclick="setFilter('all',this)">すべて</button>
+  <button class="filter-btn" data-filter="overdue" onclick="setFilter('overdue',this)">⚠ 遅延</button>
+  <button class="filter-btn" data-filter="today" onclick="setFilter('today',this)">📅 今日</button>
+  <button class="filter-btn" data-filter="unlocked" onclick="setFilter('unlocked',this)">解放済</button>
+  <button class="filter-btn" data-filter="locked" onclick="setFilter('locked',this)">🔒 未解放</button>
+  <button class="filter-btn" data-filter="lv0" onclick="setFilter('lv0',this)">未着手</button>
+  <button class="filter-btn" data-filter="mastered" onclick="setFilter('mastered',this)">👑 Lv10</button>
+</div>
+
+<!-- ===== SEARCH ===== -->
+<div class="search-wrap">
+  <input type="text" class="search-input" id="search-input" placeholder="🔍 章番号・メモを検索…" oninput="renderList()">
+</div>
+
+<!-- ===== MAIN LIST ===== -->
+<div id="main-content"></div>
+
+<!-- ===== FABs ===== -->
+<div class="fab-area">
+  <button class="fab fab-sub" onclick="scrollToTop()" title="トップへ">↑</button>
+  <button class="fab fab-main" onclick="openBulkUnlock()" title="章を解放">🔓</button>
+</div>
+
+<!-- ===== CHAPTER DETAIL MODAL ===== -->
+<div class="overlay" id="detail-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="detail-title"></div>
+    <div class="modal-sub" id="detail-sub"></div>
+
+    <div class="settings-section-title">暗記レベルを選択</div>
+    <div class="level-selector" id="level-selector"></div>
+
+    <div class="info-row">
+      <span class="info-label">次の復習日</span>
+      <span class="info-val" id="detail-next-review">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">最終復習日</span>
+      <span class="info-val" id="detail-last-review">—</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">復習回数</span>
+      <span class="info-val" id="detail-review-count">0回</span>
+    </div>
+
+    <div style="margin-top:14px">
+      <div class="settings-section-title" style="margin-top:0">メモ</div>
+      <textarea class="note-input" id="detail-note" placeholder="この章に関するメモを入力…"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" onclick="resetChapter()">リセット</button>
+      <button class="btn btn-surface" onclick="closeDetailModal()">キャンセル</button>
+      <button class="btn btn-accent" onclick="saveDetail()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BULK UNLOCK MODAL ===== -->
+<div class="overlay" id="unlock-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">章を解放する</div>
+    <div class="modal-sub">解放する章の範囲を入力してください</div>
+
+    <div class="input-row">
+      <span class="input-label">解放〜</span>
+      <input type="number" class="input-field" id="unlock-to" min="1" max="106" placeholder="例: 80">
+      <span style="font-size:12px;color:var(--muted)">章まで</span>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:16px">
+      現在 <span id="unlock-current-max" style="color:var(--accent2);font-weight:700"></span> 章まで解放済み
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-surface" onclick="closeUnlockModal()">キャンセル</button>
+      <button class="btn btn-accent" onclick="saveBulkUnlock()">解放する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS MODAL ===== -->
+<div class="overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">⚙ 設定</div>
+
+    <div class="settings-section-title">復習間隔（日数）</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:10px">
+      レベル1→2, 2→3 … の間隔をそれぞれ日数で設定
+    </div>
+    <div class="interval-grid" id="interval-grid"></div>
+
+    <div class="settings-section-title">データ管理</div>
+    <button class="btn btn-danger btn-sm btn-block" onclick="exportData()" style="margin-bottom:8px">
+      📤 データをエクスポート（JSON）
+    </button>
+    <button class="btn btn-surface btn-sm btn-block" onclick="document.getElementById('import-input').click()">
+      📥 データをインポート
+    </button>
+    <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(this)">
+
+    <div class="modal-actions" style="margin-top:20px">
+      <button class="btn btn-surface" onclick="closeSettings()">キャンセル</button>
+      <button class="btn btn-accent" onclick="saveSettings()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* =====================================================
+   CONSTANTS
+===================================================== */
+const TOTAL_CHAPTERS = 106;
+const DEFAULT_UNLOCKED = 64;
+
+// デフォルト復習間隔（レベルN → N+1 になるまでの日数, 10段階分）
+const DEFAULT_INTERVALS = [1, 2, 4, 7, 10, 14, 21, 30, 45, 60];
+// ↑ [lv0→1, lv1→2, lv2→3, lv3→4, lv4→5, lv5→6, lv6→7, lv7→8, lv8→9, lv9→10]
+
+const MAX_LEVEL = 10;
+
+// レベルに対応する色
+const LV_COLORS = [
+  '#3a3a60', // 0: 未着手
+  '#e53935', // 1
+  '#f4511e', // 2
+  '#fb8c00', // 3
+  '#fdd835', // 4
+  '#c0ca33', // 5
+  '#43a047', // 6
+  '#00acc1', // 7
+  '#1e88e5', // 8
+  '#8e24aa', // 9
+  '#f9a825', // 10: 完全定着
+];
+
+const LV_LABELS = [
+  '未着手','Lv1','Lv2','Lv3','Lv4','Lv5','Lv6','Lv7','Lv8','Lv9','Lv10'
+];
+
+/* =====================================================
+   STORAGE
+===================================================== */
+const Store = {
+  // 章データ: { [chapterId]: ChapterData }
+  // ChapterData: { level, lastReviewDate, nextReviewDate, reviewCount, note, unlocked }
+  getChapters() {
+    const raw = localStorage.getItem('rv_chapters');
+    if (raw) return JSON.parse(raw);
+    // 初期データ生成
+    const data = {};
+    for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
+      data[i] = {
+        level: 0,
+        lastReviewDate: null,
+        nextReviewDate: null,
+        reviewCount: 0,
+        note: '',
+        unlocked: i <= DEFAULT_UNLOCKED,
+      };
+    }
+    localStorage.setItem('rv_chapters', JSON.stringify(data));
+    return data;
+  },
+  saveChapters(data) { localStorage.setItem('rv_chapters', JSON.stringify(data)); },
+
+  getIntervals() {
+    const raw = localStorage.getItem('rv_intervals');
+    return raw ? JSON.parse(raw) : [...DEFAULT_INTERVALS];
+  },
+  saveIntervals(v) { localStorage.setItem('rv_intervals', JSON.stringify(v)); },
+};
+
+/* =====================================================
+   UTILS
+===================================================== */
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + n);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('ja-JP', { month: 'numeric', day: 'numeric' });
+}
+function formatDateFull(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric', weekday: 'short' });
+}
+function diffDays(a, b) {
+  const da = new Date(a + 'T00:00:00'), db = new Date(b + 'T00:00:00');
+  return Math.round((da - db) / 86400000);
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* =====================================================
+   APP STATE
+===================================================== */
+const App = {
+  filter: 'all',
+  editingChapter: null,
+  editingLevel: null,
+};
+
+/* =====================================================
+   LEGEND
+===================================================== */
+function renderLegend() {
+  const el = document.getElementById('legend');
+  const items = [
+    { color: LV_COLORS[0], label: '未着手' },
+    { color: LV_COLORS[2], label: 'Lv1-3' },
+    { color: LV_COLORS[5], label: 'Lv4-6' },
+    { color: LV_COLORS[8], label: 'Lv7-9' },
+    { color: LV_COLORS[10], label: 'Lv10' },
+    { color: 'rgba(229,57,53,.6)', label: '遅延' },
+  ];
+  el.innerHTML = items.map(it =>
+    `<div class="legend-item"><div class="legend-dot" style="background:${it.color}"></div>${it.label}</div>`
+  ).join('');
+}
+
+/* =====================================================
+   STATS BAR
+===================================================== */
+function renderStats() {
+  const chapters = Store.getChapters();
+  const today = todayStr();
+  const unlocked = Object.values(chapters).filter(c => c.unlocked);
+  const overdue  = unlocked.filter(c => c.nextReviewDate && c.nextReviewDate < today);
+  const todayDue = unlocked.filter(c => c.nextReviewDate === today);
+  const mastered = unlocked.filter(c => c.level >= MAX_LEVEL);
+  const avgLevel = unlocked.length
+    ? (unlocked.reduce((a,c) => a + c.level, 0) / unlocked.length).toFixed(1)
+    : '0.0';
+
+  document.getElementById('stats-bar').innerHTML = `
+    <div class="stat-chip">
+      <div class="stat-val" style="color:#e53935">${overdue.length}</div>
+      <div class="stat-label">遅延</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:#fb8c00">${todayDue.length}</div>
+      <div class="stat-label">今日</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:var(--accent2)">${avgLevel}</div>
+      <div class="stat-label">平均Lv</div>
+    </div>
+    <div class="stat-chip">
+      <div class="stat-val" style="color:#f9a825">${mastered.length}</div>
+      <div class="stat-label">完全定着</div>
+    </div>
+  `;
+}
+
+/* =====================================================
+   FILTER
+===================================================== */
+function setFilter(f, btn) {
+  App.filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+/* =====================================================
+   MAIN LIST
+===================================================== */
+function renderList() {
+  const chapters = Store.getChapters();
+  const today = todayStr();
+  const query = document.getElementById('search-input').value.trim().toLowerCase();
+
+  // グループ分け
+  const overdue = [], todayDue = [], upcoming = [], locked = [];
+
+  for (let i = 1; i <= TOTAL_CHAPTERS; i++) {
+    const ch = chapters[i];
+    if (!ch) continue;
+
+    // 検索フィルタ
+    if (query) {
+      const matchNum  = String(i).includes(query);
+      const matchNote = ch.note && ch.note.toLowerCase().includes(query);
+      if (!matchNum && !matchNote) continue;
+    }
+
+    // フィルタ
+    const isOverdue  = ch.unlocked && ch.nextReviewDate && ch.nextReviewDate < today;
+    const isToday    = ch.unlocked && ch.nextReviewDate === today;
+    const isLocked   = !ch.unlocked;
+    const isUnlocked = ch.unlocked;
+
+    if (App.filter === 'overdue'  && !isOverdue)  continue;
+    if (App.filter === 'today'    && !isToday)    continue;
+    if (App.filter === 'locked'   && !isLocked)   continue;
+    if (App.filter === 'unlocked' && !isUnlocked) continue;
+    if (App.filter === 'lv0'      && (ch.level !== 0 || isLocked)) continue;
+    if (App.filter === 'mastered' && ch.level < MAX_LEVEL) continue;
+
+    const item = { id: i, ch };
+    if (isLocked) { locked.push(item); continue; }
+    if (isOverdue) { overdue.push(item); continue; }
+    if (isToday)   { todayDue.push(item); continue; }
+    upcoming.push(item);
+  }
+
+  const el = document.getElementById('main-content');
+  let html = '';
+
+  if (overdue.length) {
+    html += sectionHTML(`⚠ 遅延（復習期限超過）`, overdue, today, true);
+  }
+  if (todayDue.length) {
+    html += sectionHTML(`📅 今日の復習`, todayDue, today, false);
+  }
+  if (upcoming.length && App.filter !== 'overdue' && App.filter !== 'today') {
+    html += sectionHTML(`📖 全章`, upcoming, today, false);
+  }
+  if (locked.length && (App.filter === 'all' || App.filter === 'locked')) {
+    html += sectionHTML(`🔒 未解放`, locked, today, false);
+  }
+
+  if (!html) {
+    html = '<div class="empty"><span class="emoji">🔍</span>該当する章がありません</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function sectionHTML(title, items, today, isBadgeWarn) {
+  const badge = items.length
+    ? `<span class="badge${isBadgeWarn ? ' badge-warn' : ''}">${items.length}</span>`
+    : '';
+  const cards = items.map(({id, ch}) => chapterCardHTML(id, ch, today)).join('');
+  return `
+    <div class="section-header">${title}${badge}</div>
+    <div class="chapter-list">${cards}</div>`;
+}
+
+function chapterCardHTML(id, ch, today) {
+  const locked   = !ch.unlocked;
+  const level    = ch.level;
+  const color    = LV_COLORS[level];
+  const lvLabel  = LV_LABELS[level];
+  const isOverdue = ch.nextReviewDate && ch.nextReviewDate < today;
+  const isToday   = ch.nextReviewDate === today;
+
+  const lvBadgeStyle = `background:${color}22;color:${color};border:1px solid ${color}55;`;
+
+  // progress dots (10 dots)
+  const dots = Array.from({length: MAX_LEVEL}, (_, i) =>
+    `<div class="progress-dot${i < level ? ' filled' : ''}"></div>`
+  ).join('');
+
+  // next review label
+  let reviewLabel = '—';
+  let reviewClass = '';
+  if (ch.nextReviewDate) {
+    if (isOverdue) {
+      const d = diffDays(today, ch.nextReviewDate);
+      reviewLabel = `${Math.abs(d)}日超過`;
+      reviewClass = 'overdue-text';
+    } else if (isToday) {
+      reviewLabel = '今日';
+      reviewClass = 'today-text';
+    } else {
+      const d = diffDays(ch.nextReviewDate, today);
+      reviewLabel = `${d}日後`;
+    }
+  } else if (!locked && level === 0) {
+    reviewLabel = '未着手';
+  }
+
+  const cardClass = [
+    'ch-card',
+    `lv${level}`,
+    locked ? 'locked' : '',
+    isOverdue ? 'overdue' : '',
+  ].filter(Boolean).join(' ');
+
+  const onclick = locked ? '' : `onclick="openDetail(${id})"`;
+
+  return `
+    <div class="${cardClass}" ${onclick}>
+      <div class="ch-num">${id}</div>
+      <div class="ch-body">
+        <div class="ch-row1">
+          <span class="lv-badge" style="${lvBadgeStyle}">${lvLabel}</span>
+          ${ch.note ? `<span style="font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1">${esc(ch.note.slice(0,20))}${ch.note.length>20?'…':''}</span>` : ''}
+        </div>
+        <div class="ch-row2">
+          <div class="progress-dots">${dots}</div>
+          <span class="review-date ${reviewClass}">${reviewLabel}</span>
+        </div>
+      </div>
+      ${locked ? '<span class="lock-icon">🔒</span>' : ''}
+    </div>`;
+}
+
+/* =====================================================
+   DETAIL MODAL
+===================================================== */
+function openDetail(id) {
+  const chapters = Store.getChapters();
+  const ch = chapters[id];
+  if (!ch || !ch.unlocked) return;
+
+  App.editingChapter = id;
+  App.editingLevel = ch.level;
+
+  document.getElementById('detail-title').textContent = `第 ${id} 章`;
+  document.getElementById('detail-sub').textContent =
+    ch.reviewCount > 0 ? `これまでの復習回数: ${ch.reviewCount}回` : '初回学習';
+  document.getElementById('detail-last-review').textContent = formatDateFull(ch.lastReviewDate);
+  document.getElementById('detail-review-count').textContent = `${ch.reviewCount}回`;
+  document.getElementById('detail-note').value = ch.note || '';
+
+  updateDetailNextReview(ch.level);
+  renderLevelSelector(ch.level);
+
+  document.getElementById('detail-modal').classList.add('show');
+}
+
+function renderLevelSelector(currentLevel) {
+  const el = document.getElementById('level-selector');
+  el.innerHTML = Array.from({length: MAX_LEVEL + 1}, (_, i) => {
+    const color = LV_COLORS[i];
+    const selected = i === currentLevel;
+    const style = selected
+      ? `background:${color};border-color:${color};color:#fff;`
+      : `border-color:${color}44;color:${color};`;
+    return `<div class="level-option${selected ? ' selected' : ''}"
+      style="${style}"
+      onclick="selectLevel(${i})">${i === 0 ? '—' : i}</div>`;
+  }).join('');
+}
+
+function selectLevel(lv) {
+  App.editingLevel = lv;
+  renderLevelSelector(lv);
+  updateDetailNextReview(lv);
+}
+
+function updateDetailNextReview(level) {
+  const intervals = Store.getIntervals();
+  const el = document.getElementById('detail-next-review');
+  if (level >= MAX_LEVEL) {
+    el.textContent = '完全定着 🎉';
+    return;
+  }
+  const days = intervals[level] || 1;
+  const next = addDays(todayStr(), days);
+  el.textContent = `${formatDateFull(next)}（${days}日後）`;
+}
+
+function saveDetail() {
+  const id = App.editingChapter;
+  if (!id) return;
+  const chapters = Store.getChapters();
+  const ch = chapters[id];
+  const intervals = Store.getIntervals();
+  const newLevel = App.editingLevel;
+  const today = todayStr();
+
+  // 次の復習日を計算
+  let nextReviewDate = null;
+  if (newLevel < MAX_LEVEL) {
+    const days = intervals[newLevel] || 1;
+    nextReviewDate = addDays(today, days);
+  }
+
+  // 復習回数は保存のたびにインクリメント（レベルが変わった場合のみ）
+  const reviewCount = newLevel !== ch.level
+    ? ch.reviewCount + 1
+    : ch.reviewCount;
+
+  chapters[id] = {
+    ...ch,
+    level: newLevel,
+    lastReviewDate: today,
+    nextReviewDate,
+    reviewCount,
+    note: document.getElementById('detail-note').value.trim(),
+  };
+
+  Store.saveChapters(chapters);
+
+  // メインアプリ(index.html)のrecordsにも記録を追加（連携）
+  syncToMainApp(id, newLevel, ch.level);
+
+  closeDetailModal();
+  renderAll();
+}
+
+function resetChapter() {
+  const id = App.editingChapter;
+  if (!id) return;
+  if (!confirm(`第${id}章のデータをリセットしますか？`)) return;
+  const chapters = Store.getChapters();
+  chapters[id] = {
+    level: 0,
+    lastReviewDate: null,
+    nextReviewDate: null,
+    reviewCount: 0,
+    note: '',
+    unlocked: chapters[id].unlocked,
+  };
+  Store.saveChapters(chapters);
+  closeDetailModal();
+  renderAll();
+}
+
+function closeDetailModal() {
+  document.getElementById('detail-modal').classList.remove('show');
+  App.editingChapter = null;
+  App.editingLevel = null;
+}
+
+/* =====================================================
+   MAIN APP 連携（localStorage経由）
+===================================================== */
+function syncToMainApp(chapterId, newLevel, oldLevel) {
+  // index.htmlのlocalStorageキー（slp_records）に書き込む
+  try {
+    const records = JSON.parse(localStorage.getItem('slp_records') || '[]');
+    const today = todayStr();
+    const uid = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    records.push({
+      id: uid,
+      date: today,
+      subjectName: `暗記（第${chapterId}章）`,
+      seconds: 0,          // 時間計測なし（復習管理ページからの記録）
+      note: `Lv${oldLevel}→Lv${newLevel} 復習完了`,
+      source: 'review',    // 出所を明示
+    });
+    localStorage.setItem('slp_records', JSON.stringify(records));
+  } catch (e) {
+    console.warn('メインアプリへの同期に失敗:', e);
+  }
+}
+
+/* =====================================================
+   BULK UNLOCK MODAL
+===================================================== */
+function openBulkUnlock() {
+  const chapters = Store.getChapters();
+  const currentMax = Math.max(...Object.entries(chapters)
+    .filter(([, ch]) => ch.unlocked)
+    .map(([id]) => Number(id)));
+  document.getElementById('unlock-current-max').textContent = currentMax;
+  document.getElementById('unlock-to').value = '';
+  document.getElementById('unlock-modal').classList.add('show');
+}
+
+function closeUnlockModal() {
+  document.getElementById('unlock-modal').classList.remove('show');
+}
+
+function saveBulkUnlock() {
+  const to = parseInt(document.getElementById('unlock-to').value);
+  if (!to || to < 1 || to > TOTAL_CHAPTERS) {
+    alert(`1〜${TOTAL_CHAPTERS}の範囲で入力してください`);
+    return;
+  }
+  const chapters = Store.getChapters();
+  for (let i = 1; i <= to; i++) {
+    if (chapters[i]) chapters[i].unlocked = true;
+  }
+  Store.saveChapters(chapters);
+  closeUnlockModal();
+  renderAll();
+}
+
+/* =====================================================
+   SETTINGS MODAL
+===================================================== */
+function openSettings() {
+  renderIntervalGrid();
+  document.getElementById('settings-modal').classList.add('show');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('show');
+}
+
+function renderIntervalGrid() {
+  const intervals = Store.getIntervals();
+  const el = document.getElementById('interval-grid');
+  el.innerHTML = intervals.map((days, i) => `
+    <div class="interval-item">
+      <span class="interval-item-label">Lv${i}→${i+1}</span>
+      <input type="number" min="1" max="365" value="${days}" id="iv-${i}">
+      <span class="interval-item-unit">日</span>
+    </div>
+  `).join('');
+}
+
+function saveSettings() {
+  const intervals = [];
+  for (let i = 0; i < MAX_LEVEL; i++) {
+    const v = parseInt(document.getElementById(`iv-${i}`)?.value) || DEFAULT_INTERVALS[i];
+    intervals.push(Math.max(1, Math.min(365, v)));
+  }
+  Store.saveIntervals(intervals);
+  closeSettings();
+  renderAll();
+}
+
+/* =====================================================
+   EXPORT / IMPORT
+===================================================== */
+function exportData() {
+  const data = {
+    chapters: Store.getChapters(),
+    intervals: Store.getIntervals(),
+    exportedAt: new Date().toISOString(),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `review-backup-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.chapters) Store.saveChapters(data.chapters);
+      if (data.intervals) Store.saveIntervals(data.intervals);
+      alert('インポート完了！');
+      closeSettings();
+      renderAll();
+    } catch {
+      alert('ファイルの形式が正しくありません');
+    }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+/* =====================================================
+   HELPERS
+===================================================== */
+function scrollToTop() { window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+function renderAll() {
+  renderStats();
+  renderList();
+}
+
+/* =====================================================
+   INIT
+===================================================== */
+function init() {
+  // 章データが未作成なら初期化
+  Store.getChapters();
+
+  renderLegend();
+  renderStats();
+  renderList();
+
+  // モーダルを外側クリックで閉じる
+  ['detail-modal','unlock-modal','settings-modal'].forEach(id => {
+    document.getElementById(id).addEventListener('click', function(e) {
+      if (e.target === this) {
+        if (id === 'detail-modal')   closeDetailModal();
+        if (id === 'unlock-modal')   closeUnlockModal();
+        if (id === 'settings-modal') closeSettings();
+      }
+    });
+  });
+}
+
+init();
+</script>
+</body>
+</html>
